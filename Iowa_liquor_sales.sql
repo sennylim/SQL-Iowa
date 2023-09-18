@@ -11,6 +11,7 @@ GROUP BY
 ORDER BY
 	years DESC;
 
+
 -- Which days have the highest sales?
 
 SELECT
@@ -23,7 +24,8 @@ GROUP BY
 	days
 ORDER BY
 	total_sales DESC;
-	
+
+
 -- Which months have the highest sales?
 
 SELECT
@@ -36,7 +38,8 @@ GROUP BY
 	months
 ORDER BY
 	total_sales DESC;
-	
+
+
 -- Sales by Vendor
 
 SELECT
@@ -50,7 +53,8 @@ GROUP BY
 ORDER BY
 	total_sales DESC;
 
--- Q1a) Sales by Month '22 to '23
+
+-- How have liquor sales in Iowa changed over the past year? (from '22 to '23)
 
 SELECT
 	DATE_TRUNC('MONTH', date) AS months,
@@ -61,9 +65,10 @@ WHERE date BETWEEN '2022-01-01' AND '2023-08-29'
 GROUP BY
 	months
 ORDER BY
-	months, total_sales 
+	months, total_sales;
+
 	
---Q1b) Highest sales revenue
+-- Which types of liquor have the highest sales revenue?
 
 SELECT
 	EXTRACT ('YEAR' FROM date) AS years,
@@ -80,9 +85,10 @@ GROUP BY
 	1, 2, 3
 
 ORDER BY
-	5 DESC
+	5 DESC;
+
 	
---Q1b) Highest sales volume
+-- Which types of liquor have the highest sales volume?
 
 SELECT
 	EXTRACT ('YEAR' FROM date) AS years,
@@ -99,9 +105,10 @@ GROUP BY
 	1, 2, 3
 
 ORDER BY
-	4 DESC
+	4 DESC;
+
 	
--- Q1c) Seasonal patterns
+-- Are there any seasonal trends in liquor sales?
 
 SELECT
 	to_char(date, 'Month') AS months,
@@ -116,9 +123,10 @@ GROUP BY
 	1, 2
 
 ORDER BY
-	3 DESC
+	3 DESC;
+
 	
--- Q2a) Store with the highest sales
+-- Which liquor stores in Iowa have the highest sales?
 
 SELECT
 	lower(store_name) AS store,
@@ -133,17 +141,20 @@ GROUP BY
 	1, 2
 
 ORDER BY
-	4 DESC
+	4 DESC;
+
 	
--- Q2b) Underperforming stores
+-- Are there any stores that are underperforming?
 
 SELECT category_name, item_description, pack, state_bottle_cost, state_bottle_retail
 
 FROM iowa
 
-WHERE lower(store_name) = 'kum & go #570 / johnston' OR lower(store_name) = 'raysmarket'
+WHERE lower(store_name) = 'kum & go #570 / johnston' 
+	OR lower(store_name) = 'raysmarket';
 
--- Q2b) Geographical patterns
+	
+-- Is there any geographic patterns in store performance?
 
 SELECT
 	lower(store_name) AS store,
@@ -160,9 +171,10 @@ GROUP BY
 	1, 2, 3, 4
 
 ORDER BY
-	5 DESC
+	5 DESC;
+
 	
--- 3a) Best-sellers: brand (bottles)
+-- Which liquor brands are the best-sellers? (by bottles)
 
 SELECT
 	lower(item_description) AS item,
@@ -176,9 +188,10 @@ GROUP BY
 	1
 
 ORDER BY
-	2 DESC
+	2 DESC;
 
--- 3a) Best-sellers: brand (total sales)
+
+-- Which liquor brands are the best-sellers? (by total sales)
 SELECT
 	lower(item_description) AS item,
 	SUM(bottles_sold) AS bottle_sales,
@@ -191,9 +204,10 @@ GROUP BY
 	1
 
 ORDER BY
-	3 DESC
+	3 DESC;
 
--- 3a) Best-sellers: product (bottles)
+
+-- Which liquor products are the best-sellers? (by bottles)
 SELECT
 	lower(category_name) AS category,
 	SUM(bottles_sold) AS bottle_sales,
@@ -206,9 +220,10 @@ GROUP BY
 	1
 
 ORDER BY
-	2 DESC
-	
--- 3a) Best-sellers: product (total sales)
+	2 DESC;
+
+
+-- Which liquor products are the best-sellers? (by total sales)
 SELECT
 	lower(category_name) AS category,
 	SUM(bottles_sold) AS bottle_sales,
@@ -221,9 +236,11 @@ GROUP BY
 	1
 
 ORDER BY
-	3 DESC
-	
--- 3b) Sales trends
+	3 DESC;
+
+
+-- Are there any products with declining sales?
+
 WITH monthly_sales AS (
 	SELECT
 	EXTRACT ('Year' FROM date) AS years,
@@ -246,11 +263,3 @@ GROUP BY
 	1, 2, 3, 4
 ORDER BY
 	1, 2;
-	
-
--- Q4) Time Series
-
-SELECT 
-	EXTRACT(days FROM dates),
-	AVG(sale_dollars) OVER (ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) as Simple_moving_averages
-FROM iowa
