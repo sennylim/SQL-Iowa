@@ -1,4 +1,4 @@
-# SQL-code
+# PostgreSQL - Iowa Liquor Retail Sales Dataset
 
 	
 <p> Iowa Liquor Retail Sales dataset contains every wholesale purchase of liquor in the State of Iowa by retailers for sale to individuals since January 1, 2012.<br> 
