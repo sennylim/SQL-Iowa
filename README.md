@@ -1,10 +1,10 @@
-# PostgreSQL - Iowa Liquor Retail Sales Dataset
+# BigQuery - Iowa Liquor Retail Sales Data Exploration
 
 	
 <p> Iowa Liquor Retail Sales dataset contains every wholesale purchase of liquor in the State of Iowa by retailers for sale to individuals since January 1, 2012.<br> 
 (Dataset source: https://www.iowa.gov/difs)</p><br>
 
-<p> This dataset was analysed using PostgreSQL and the codes reflect the following questions:<br><br>
+<p> This dataset was analysed using BigQuery and the codes reflect the following questions:<br><br>
 <strong>Sales Performance Analysis:</strong> <br>
     - How have liquor sales in Iowa changed over the past year?<br>
     - Which types of liquor have the highest sales volume and revenue?<br>
