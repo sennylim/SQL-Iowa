@@ -1,24 +1,25 @@
+-- CODES FOR BIGQUERY
+
+
 -- Total sales by year
 
-SELECT 
-	EXTRACT ('YEAR' FROM date) AS years,
-	ROUND(SUM(sale_dollars)) AS total_sales
-
-FROM iowa
-
-GROUP BY 
-	years
+SELECT
+  DISTINCT(FORMAT_DATE('%Y', date)) AS years,
+  ROUND(SUM(sale_dollars),2) AS total_sales
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+GROUP BY
+  years
 ORDER BY
-	years DESC;
+  years DESC;
 
 
 -- Which days have the highest sales?
 
 SELECT
-	to_char(date, 'Day') AS days,
+	DISTINCT(FORMAT_DATE('%A', date)) AS days,
 	ROUND(CAST(SUM(sale_dollars) as numeric),2) AS total_sales 
 
-FROM iowa
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
 
 GROUP BY 
 	days
@@ -29,10 +30,10 @@ ORDER BY
 -- Which months have the highest sales?
 
 SELECT
-	to_char(date, 'Month') AS months,
+	DISTINCT (FORMAT_DATE('%B', date)) AS months,
 	ROUND(CAST(SUM(sale_dollars) as numeric),2) AS total_sales 
 
-FROM iowa
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
 
 GROUP BY 
 	months
@@ -43,10 +44,10 @@ ORDER BY
 -- Sales by Vendor
 
 SELECT
-	lower(vendor_name) AS vendor,
+	vendor_name AS vendor,
 	ROUND(CAST(SUM(sale_dollars) AS numeric),0) AS total_sales
 
-FROM iowa
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
 
 GROUP BY 
 	vendor
@@ -54,32 +55,34 @@ ORDER BY
 	total_sales DESC;
 
 
--- How have liquor sales in Iowa changed over the past year? (from '22 to '23)
+-- Sales by Month '22 to '23
 
 SELECT
-	DATE_TRUNC('MONTH', date) AS months,
+	DISTINCT(FORMAT_DATE('%b %Y', date)) AS month_year,
 	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
 
-FROM iowa
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
 WHERE date BETWEEN '2022-01-01' AND '2023-08-29'
 GROUP BY
-	months
+	month_year
 ORDER BY
-	months, total_sales;
+	month_year, total_sales; 
 
-	
--- Which types of liquor have the highest sales revenue?
+
+-- Highest sales revenue (2022)
 
 SELECT
-	EXTRACT ('YEAR' FROM date) AS years,
-	lower(item_description) AS item,
-	lower(category_name) AS category,
-	SUM(bottles_sold) AS bottle_sales,
+	FORMAT_DATE('%Y', date) AS year, 
+  item_description AS item,
+  category_name AS category,
+  SUM(bottles_sold) AS bottle_sales,
 	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
 
-FROM iowa
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
 
-WHERE date BETWEEN '2022-01-01' AND '2023-08-29'
+WHERE 
+  FORMAT_DATE('%Y', date) LIKE ('%2022%')
 
 GROUP BY 
 	1, 2, 3
@@ -87,19 +90,40 @@ GROUP BY
 ORDER BY
 	5 DESC;
 
-	
--- Which types of liquor have the highest sales volume?
+
+-- Highest sales revenue (2023)
 
 SELECT
-	EXTRACT ('YEAR' FROM date) AS years,
-	lower(item_description) AS item,
-	lower(category_name) AS category,
-	SUM(bottles_sold) AS bottle_sales,
+	FORMAT_DATE('%Y', date) AS year, 
+  item_description AS item,
+  category_name AS category,
+  SUM(bottles_sold) AS bottle_sales,
 	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
 
-FROM iowa
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
 
-WHERE date BETWEEN '2022-01-01' AND '2023-08-29'
+WHERE 
+  FORMAT_DATE('%Y', date) LIKE ('%2023%')
+
+GROUP BY 
+	1, 2, 3
+
+ORDER BY
+	5 DESC;
+
+
+-- Highest sales volume (2022)
+
+SELECT
+	FORMAT_DATE('%Y', date) AS year,
+  item_description AS item,
+  category_name AS category,
+  SUM(bottles_sold) AS bottle_sales,
+	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
+
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+WHERE FORMAT_DATE('%Y', date) LIKE ('%2022%')
 
 GROUP BY 
 	1, 2, 3
@@ -107,35 +131,56 @@ GROUP BY
 ORDER BY
 	4 DESC;
 
-	
--- Are there any seasonal trends in liquor sales?
 
+-- Highest sales volume (2023)
 SELECT
-	to_char(date, 'Month') AS months,
-	lower(category_name) AS category,
-	SUM(bottles_sold) AS bottle_sales,
+	FORMAT_DATE('%Y', date) AS year,
+  item_description AS item,
+  category_name AS category,
+  SUM(bottles_sold) AS bottle_sales,
 	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
 
-FROM iowa
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
 
-WHERE date BETWEEN '2020-01-01' AND '2023-08-29'
+WHERE FORMAT_DATE('%Y', date) LIKE ('%2023%')
+
+GROUP BY 
+	1, 2, 3
+
+ORDER BY
+	4 DESC;
+
+
+-- Seasonal patterns
+
+SELECT
+	DISTINCT(FORMAT_DATE('%m - %Y', date)) AS month_year,
+  category_name AS category,
+	MAX(bottles_sold) AS bottle_sales,
+	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
+
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+WHERE FORMAT_DATE('%Y', date) LIKE ('%2022')
+
 GROUP BY 
 	1, 2
 
 ORDER BY
-	3 DESC;
+	1, 3 DESC;
 
-	
--- Which liquor stores in Iowa have the highest sales?
+
+-- Store with the highest sales
 
 SELECT
-	lower(store_name) AS store,
-	lower(county) AS county,
+	store_name AS store,
+	county AS county,
 	SUM(bottles_sold) AS bottle_sales,
 	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
 	
-FROM iowa
-WHERE date BETWEEN '2020-01-01' AND '2023-08-29'
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+WHERE FORMAT_DATE('%Y', date) LIKE ('%2022')
 
 GROUP BY
 	1, 2
@@ -143,123 +188,84 @@ GROUP BY
 ORDER BY
 	4 DESC;
 
-	
--- Are there any stores that are underperforming?
 
-SELECT category_name, item_description, pack, state_bottle_cost, state_bottle_retail
+-- Underperforming stores
 
-FROM iowa
+SELECT 
+  date,
+	address,
+	city,
+  item_description AS item,
+  category_name AS category,
+  SUM(bottles_sold) AS bottle_sales,
+	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
 
-WHERE lower(store_name) = 'kum & go #570 / johnston' 
-	OR lower(store_name) = 'raysmarket';
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
 
-	
--- Is there any geographic patterns in store performance?
+WHERE store_name = 'HY-VEE WINE AND SPIRITS / WATERLOO!'
+
+GROUP BY 1, 2, 3, 4, 5;
+
+
+-- Geographical patterns
 
 SELECT
-	lower(store_name) AS store,
-	lower(county) AS county,
-	lower(category_name) AS category,
-	lower(item_description) AS item,
+	store_name AS store,
+	county AS county,
+	category_name AS category,
+	item_description AS item,
 	SUM(bottles_sold) AS bottle_sales,
 	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
 	
-FROM iowa
-WHERE date BETWEEN '2020-01-01' AND '2023-08-29'
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+WHERE FORMAT_DATE('%Y', date) LIKE ('%2022') AND county is not null
 
 GROUP BY
 	1, 2, 3, 4
 
 ORDER BY
-	5 DESC;
+	2,5 DESC;
 
 	
--- Which liquor brands are the best-sellers? (by bottles)
+-- Sales trends '18 - '22
 
-SELECT
-	lower(item_description) AS item,
-	SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-	
-FROM iowa
-WHERE date BETWEEN '2020-01-01' AND '2023-08-29'
-
-GROUP BY
-	1
-
-ORDER BY
-	2 DESC;
-
-
--- Which liquor brands are the best-sellers? (by total sales)
-SELECT
-	lower(item_description) AS item,
-	SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-	
-FROM iowa
-WHERE date BETWEEN '2020-01-01' AND '2023-08-29'
-
-GROUP BY
-	1
-
-ORDER BY
-	3 DESC;
-
-
--- Which liquor products are the best-sellers? (by bottles)
-SELECT
-	lower(category_name) AS category,
-	SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-	
-FROM iowa
-WHERE date BETWEEN '2020-01-01' AND '2023-08-29'
-
-GROUP BY
-	1
-
-ORDER BY
-	2 DESC;
-
-
--- Which liquor products are the best-sellers? (by total sales)
-SELECT
-	lower(category_name) AS category,
-	SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-	
-FROM iowa
-WHERE date BETWEEN '2020-01-01' AND '2023-08-29'
-
-GROUP BY
-	1
-
-ORDER BY
-	3 DESC;
-
-
--- Are there any products with declining sales?
-
-WITH monthly_sales AS (
+WITH sales AS (
 	SELECT
-	EXTRACT ('Year' FROM date) AS years,
-	to_char (date, 'Month') AS months,
-	lower(item_description) AS items,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-	
-FROM iowa
-
-GROUP BY
-	1, 2, 3
+	FORMAT_DATE('%Y', date) AS year,
+	ROUND(CAST(SUM(sale_dollars) AS numeric)) AS total_sales
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+WHERE date BETWEEN '2017-01-01' AND '2022-12-31'
+GROUP BY year
+ORDER BY 2 DESC
 )
+
 SELECT
-	years, months, items, total_sales,
-	LAG(total_sales) OVER (ORDER BY years, months) AS sales_previous_month,
-	total_sales - LAG(total_sales) OVER (ORDER BY years, months) AS month_to_month_difference
+	year, total_sales,
+	ROUND(((total_sales/LAG(total_sales) OVER (ORDER BY year)) - 1)*100,1) AS change
 FROM
-	monthly_sales
-GROUP BY
-	1, 2, 3, 4
+	sales
 ORDER BY
-	1, 2;
+	1 DESC;
+
+
+-- Consumption trend '18 - '22
+
+WITH liters AS (
+	SELECT
+	FORMAT_DATE('%Y', date) AS year,
+	ROUND(SUM(volume_sold_liters)) AS total_liters
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+WHERE date BETWEEN '2017-01-01' AND '2022-12-31'
+GROUP BY year
+ORDER BY 2 DESC
+)
+
+SELECT
+	year, total_liters,
+	ROUND(((total_liters/LAG(total_liters) OVER (ORDER BY year)) - 1)*100,1) AS change
+FROM
+	liters
+ORDER BY
+	1 DESC;
+	
