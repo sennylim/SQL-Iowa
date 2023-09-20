@@ -13,21 +13,7 @@ ORDER BY
   years DESC;
 
 
--- Which days have the highest sales?
-
-SELECT
-	DISTINCT(FORMAT_DATE('%A', date)) AS days,
-	ROUND(CAST(SUM(sale_dollars) as numeric),2) AS total_sales 
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-GROUP BY 
-	days
-ORDER BY
-	total_sales DESC;
-
-
--- Which months have the highest sales?
+-- Seasonal patterns
 
 SELECT
 	DISTINCT (FORMAT_DATE('%B', date)) AS months,
@@ -41,193 +27,6 @@ ORDER BY
 	total_sales DESC;
 
 
--- Sales by Vendor
-
-SELECT
-	vendor_name AS vendor,
-	ROUND(CAST(SUM(sale_dollars) AS numeric),0) AS total_sales
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-GROUP BY 
-	vendor
-ORDER BY
-	total_sales DESC;
-
-
--- Sales by Month '22 to '23
-
-SELECT
-	DISTINCT(FORMAT_DATE('%b %Y', date)) AS month_year,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE date BETWEEN '2022-01-01' AND '2023-08-29'
-GROUP BY
-	month_year
-ORDER BY
-	month_year, total_sales; 
-
-
--- Highest sales revenue (2022)
-
-SELECT
-	FORMAT_DATE('%Y', date) AS year, 
-  item_description AS item,
-  category_name AS category,
-  SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE 
-  FORMAT_DATE('%Y', date) LIKE ('%2022%')
-
-GROUP BY 
-	1, 2, 3
-
-ORDER BY
-	5 DESC;
-
-
--- Highest sales revenue (2023)
-
-SELECT
-	FORMAT_DATE('%Y', date) AS year, 
-  item_description AS item,
-  category_name AS category,
-  SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE 
-  FORMAT_DATE('%Y', date) LIKE ('%2023%')
-
-GROUP BY 
-	1, 2, 3
-
-ORDER BY
-	5 DESC;
-
-
--- Highest sales volume (2022)
-
-SELECT
-	FORMAT_DATE('%Y', date) AS year,
-  item_description AS item,
-  category_name AS category,
-  SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE FORMAT_DATE('%Y', date) LIKE ('%2022%')
-
-GROUP BY 
-	1, 2, 3
-
-ORDER BY
-	4 DESC;
-
-
--- Highest sales volume (2023)
-SELECT
-	FORMAT_DATE('%Y', date) AS year,
-  item_description AS item,
-  category_name AS category,
-  SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE FORMAT_DATE('%Y', date) LIKE ('%2023%')
-
-GROUP BY 
-	1, 2, 3
-
-ORDER BY
-	4 DESC;
-
-
--- Seasonal patterns
-
-SELECT
-	DISTINCT(FORMAT_DATE('%m - %Y', date)) AS month_year,
-  category_name AS category,
-	MAX(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE FORMAT_DATE('%Y', date) LIKE ('%2022')
-
-GROUP BY 
-	1, 2
-
-ORDER BY
-	1, 3 DESC;
-
-
--- Store with the highest sales
-
-SELECT
-	store_name AS store,
-	county AS county,
-	SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-	
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE FORMAT_DATE('%Y', date) LIKE ('%2022')
-
-GROUP BY
-	1, 2
-
-ORDER BY
-	4 DESC;
-
-
--- Underperforming stores
-
-SELECT 
-  date,
-	address,
-	city,
-  item_description AS item,
-  category_name AS category,
-  SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE store_name = 'HY-VEE WINE AND SPIRITS / WATERLOO!'
-
-GROUP BY 1, 2, 3, 4, 5;
-
-
--- Geographical patterns
-
-SELECT
-	store_name AS store,
-	county AS county,
-	category_name AS category,
-	item_description AS item,
-	SUM(bottles_sold) AS bottle_sales,
-	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
-	
-FROM `bigquery-public-data.iowa_liquor_sales.sales` 
-
-WHERE FORMAT_DATE('%Y', date) LIKE ('%2022') AND county is not null
-
-GROUP BY
-	1, 2, 3, 4
-
-ORDER BY
-	2,5 DESC;
-
-	
 -- Sales trends '18 - '22
 
 WITH sales AS (
@@ -268,4 +67,97 @@ FROM
 	liters
 ORDER BY
 	1 DESC;
+
+
+-- Which days have the highest sales?
+
+SELECT
+	DISTINCT(FORMAT_DATE('%A', date)) AS days,
+	ROUND(CAST(SUM(sale_dollars) as numeric),2) AS total_sales 
+
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+GROUP BY 
+	days
+ORDER BY
+	total_sales DESC;
+
+
+-- Sales by Month '21 to '22
+
+SELECT
+	DISTINCT(FORMAT_DATE('%b %Y', date)) AS month_year,
+	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
+
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+WHERE date BETWEEN '2022-01-01' AND '2023-08-29'
+GROUP BY
+	month_year
+ORDER BY
+	month_year, total_sales; 
+
+
+-- Highest sales/volume revenue (2022)
+
+SELECT
+	FORMAT_DATE('%Y', date) AS year, 
+  item_description AS item,
+  category_name AS category,
+  SUM(bottles_sold) AS bottle_sales,
+	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
+
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+WHERE 
+  FORMAT_DATE('%Y', date) LIKE ('%2022%')
+
+GROUP BY 
+	1, 2, 3
+
+ORDER BY
+	5 DESC;
+
+
+-- Store with the highest sales
+
+SELECT
+	store_name AS store,
+	county AS county,
+	SUM(bottles_sold) AS bottle_sales,
+	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
+	
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+WHERE FORMAT_DATE('%Y', date) LIKE ('%2022')
+
+GROUP BY
+	1, 2
+
+ORDER BY
+	4 DESC;
+
+
+-- Geographical patterns
+
+SELECT
+	store_name AS store,
+	county AS county,
+	category_name AS category,
+	item_description AS item,
+	SUM(bottles_sold) AS bottle_sales,
+	ROUND(CAST(SUM(sale_dollars) AS numeric), 0) AS total_sales
+	
+FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+
+WHERE FORMAT_DATE('%Y', date) LIKE ('%2022') AND county is not null
+
+GROUP BY
+	1, 2, 3, 4
+
+ORDER BY
+	2,5 DESC;
+
+	
+
 	
